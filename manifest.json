@@ -1,0 +1,75 @@
+{
+  "action": {
+    "default_popup": "popup.html"
+  },
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "all_frames": true,
+      "js": [
+        "Logger.js",
+        "content-script.js"
+      ],
+      "matches": [
+        "https://przegladarka-ekw.ms.gov.pl/eukw_prz/KsiegiWieczyste/wyszukiwanieKW*"
+      ],
+      "run_at": "document_end"
+    },
+    {
+      "all_frames": true,
+      "js": [
+        "cts.js"
+      ],
+      "matches": [
+        "https://przegladarka-ekw.ms.gov.pl/*"
+      ],
+      "run_at": "document_start"
+    }
+  ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'"
+  },
+  "description": "Rozszerzenie pomaga w pobieraniu zawartości ksiąg wieczystych na dysk.",
+  "externally_connectable": {
+    "matches": [
+      "*://*.przegladarka-ekw.ms.gov.pl/*",
+      "*://*.google.com/recaptcha/api2/anchor*"
+    ]
+  },
+  "host_permissions": [
+    "*://*.przegladarka-ekw.ms.gov.pl/*",
+    "*://.przegladarka-ekw.ms.gov.pl/*",
+    "https://engageub.pythonanywhere.com/*"
+  ],
+  "icons": {
+    "128": "icon.png"
+  },
+  "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEApFnOqcHp8GhKYzxbEs41gdMB70C0WS9zRzWJ0nHnmUberKqq5oxerHkAy66uZp/CWJ1XDisSKPWFmbs9e+Mv9okACbr+1bfFnalhw3uTwiyQiGufEEg4jjnXT2SicXA+eOIB8Rh28kZDv95zwWhNto/pGvwm3MRe2rd+2noJDyLqIno+fntvk9NcUahcMbkKppoXOtZ8nuCvTaNPFFRvXuQ8daQCv+MDEuE+WlDSE1ftvWHphlfysoQCa0VRYx2HTWXn6eskUKME81yVSDSgtQ6C44DZrCaDcfBeeg8H8qzhisVKBkJBJkHiUG1cDNOl/FdVBtg0iDRW0XIo5jeAjQIDAQAB",
+  "manifest_version": 3,
+  "name": "Księgi wieczyste pobieracz",
+  "permissions": [
+    "scripting",
+    "declarativeNetRequest",
+    "storage",
+    "proxy",
+    "cookies",
+    "tabs",
+    "browsingData"
+  ],
+  "update_url": "https://clients2.google.com/service/update2/crx",
+  "version": "1.1.8",
+  "web_accessible_resources": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "resources": [
+        "cts.js",
+        "utils.js"
+      ]
+    }
+  ]
+}

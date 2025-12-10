@@ -1,0 +1,2 @@
+
+Dodano tryb headless (bez podglądu): iframy są ukryte (display:none), logika zapisu bez zmian.
