@@ -8,7 +8,9 @@ const COOKIE_DOMAINS = [
     ".przegladarka-ekw.ms.gov.pl"
 ];
 const bg = {
-    setProxy: async function(e) {
+    currentProxyAuth: null,
+    setProxy: async function(e, auth = null) {
+        bg.currentProxyAuth = auth;
         let t = {};
         t = 0 === e.length ? {
             mode: "pac_script",
@@ -29,75 +31,108 @@ const bg = {
     },
     setUserAgent: async function(e) {
         await chrome.declarativeNetRequest.updateDynamicRules({
-            addRules: [{
-                id: 1,
-                priority: 1,
-                action: {
-                    type: "modifyHeaders",
-                    requestHeaders: [
-                        {
-                            header: "user-agent",
-                            operation: "set",
-                            value: e
-                        },
-                        {
-                            header: "accept",
-                            operation: "set",
-                            value: "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7"
-                        },
-                        {
-                            header: "accept-language",
-                            operation: "set",
-                            value: "pl-PL,pl;q=0.9,en-US;q=0.8,en;q=0.7"
-                        },
-                        {
-                            header: "sec-ch-ua",
-                            operation: "set",
-                            value: '"Microsoft Edge";v="131", "Chromium";v="131", "Not_A Brand";v="24"'
-                        },
-                        {
-                            header: "sec-ch-ua-mobile",
-                            operation: "set",
-                            value: "?0"
-                        },
-                        {
-                            header: "sec-ch-ua-platform",
-                            operation: "set",
-                            value: '"Windows"'
-                        },
-                        {
-                            header: "sec-fetch-dest",
-                            operation: "set",
-                            value: "document"
-                        },
-                        {
-                            header: "sec-fetch-mode",
-                            operation: "set",
-                            value: "navigate"
-                        },
-                        {
-                            header: "sec-fetch-site",
-                            operation: "set",
-                            value: "same-origin"
-                        },
-                        {
-                            header: "sec-fetch-user",
-                            operation: "set",
-                            value: "?1"
-                        },
-                        {
-                            header: "upgrade-insecure-requests",
-                            operation: "set",
-                            value: "1"
-                        }
-                    ]
+            addRules: [
+                {
+                    id: 1,
+                    priority: 1,
+                    action: {
+                        type: "modifyHeaders",
+                        requestHeaders: [
+                            {
+                                header: "user-agent",
+                                operation: "set",
+                                value: e
+                            },
+                            {
+                                header: "accept",
+                                operation: "set",
+                                value: "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8"
+                            },
+                            {
+                                header: "accept-language",
+                                operation: "set",
+                                value: "pl-PL,pl;q=0.9"
+                            },
+                            {
+                                header: "accept-encoding",
+                                operation: "set",
+                                value: "gzip, deflate, br"
+                            },
+                            {
+                                header: "cache-control",
+                                operation: "set",
+                                value: "max-age=0"
+                            },
+                            {
+                                header: "pragma",
+                                operation: "set",
+                                value: "no-cache"
+                            },
+                            {
+                                header: "dnt",
+                                operation: "set",
+                                value: "1"
+                            },
+                            {
+                                header: "upgrade-insecure-requests",
+                                operation: "set",
+                                value: "1"
+                            },
+                            {
+                                header: "sec-ch-ua",
+                                operation: "remove"
+                            },
+                            {
+                                header: "sec-ch-ua-mobile",
+                                operation: "remove"
+                            },
+                            {
+                                header: "sec-ch-ua-platform",
+                                operation: "remove"
+                            },
+                            {
+                                header: "sec-fetch-dest",
+                                operation: "remove"
+                            },
+                            {
+                                header: "sec-fetch-mode",
+                                operation: "remove"
+                            },
+                            {
+                                header: "sec-fetch-site",
+                                operation: "remove"
+                            },
+                            {
+                                header: "sec-fetch-user",
+                                operation: "remove"
+                            }
+                        ]
+                    },
+                    condition: {
+                        urlFilter: "przegladarka-ekw.ms.gov.pl",
+                        resourceTypes: ["main_frame", "sub_frame", "stylesheet", "script", "image", "font", "object", "xmlhttprequest", "ping", "csp_report", "media", "websocket", "webtransport", "webbundle", "other"]
+                    }
                 },
-                condition: {
-                    urlFilter: "przegladarka-ekw.ms.gov.pl",
-                    resourceTypes: ["main_frame", "sub_frame", "stylesheet", "script", "image", "font", "object", "xmlhttprequest", "ping", "csp_report", "media", "websocket", "webtransport", "webbundle", "other"]
+                {
+                    id: 2,
+                    priority: 1,
+                    action: {
+                        type: "modifyHeaders",
+                        requestHeaders: [
+                            {
+                                header: "referer",
+                                operation: "set",
+                                value: "https://przegladarka-ekw.ms.gov.pl/eukw_prz/KsiegiWieczyste/wyszukiwanieKW"
+                            }
+                        ]
+                    },
+                    condition: {
+                        urlFilter: "przegladarka-ekw.ms.gov.pl",
+                        resourceTypes: ["sub_frame", "xmlhttprequest"]
+                    }
                 }
-            }],
-            removeRuleIds: [1]
+            ],
+            removeRuleIds: [1, 2]
         }, () => {
             chrome.runtime.lastError && console.error(chrome.runtime.lastError)
         })
@@ -107,18 +142,37 @@ const bg = {
             for (const domain of COOKIE_DOMAINS) {
                 await deleteDomainCookies(domain);
             }
-        } else if ("set-proxy" === e.type) await bg.setProxy(e.proxy);
-        else "set-user-agent" === e.type && await bg.setUserAgent(e.ua)
+        } else if ("set-proxy" === e.type) {
+            let auth = e.auth || null;
+            await bg.setProxy(e.proxy, auth);
+        } else "set-user-agent" === e.type && await bg.setUserAgent(e.ua)
     },
     addListeners: function() {
         chrome.runtime.onMessageExternal.addListener(async (e, t, a) => {
             await bg.handleMessage(e)
         }), chrome.runtime.onMessage.addListener(async (e, t, a) => {
             await bg.handleMessage(e)
-        })
+        });
+        
+        // Handle proxy authentication
+        chrome.webRequest.onAuthRequired.addListener(
+            function(details) {
+                if (bg.currentProxyAuth && bg.currentProxyAuth.username && bg.currentProxyAuth.password) {
+                    return {
+                        authCredentials: {
+                            username: bg.currentProxyAuth.username,
+                            password: bg.currentProxyAuth.password
+                        }
+                    };
+                }
+                return {cancel: false};
+            },
+            {urls: ["<all_urls>"]},
+            ['blocking']
+        );
     },
     async init() {
-        bg.addListeners(), await bg.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 Edg/131.0.0.0")
+        bg.addListeners(), await bg.setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:133.0) Gecko/20100101 Firefox/133.0")
     }
 };
 bg.init(), (() => {

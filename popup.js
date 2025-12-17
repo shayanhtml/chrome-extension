@@ -281,24 +281,50 @@ const popup = {
                 await chrome.runtime.sendMessage({type: "set-proxy", proxy: ""});
                 
                 document.getElementById("lista-proxy").value.replace(/(?:\r\n)/g, "\n").split("\n").forEach(line => {
-                    let parts = line.trim().split(":");
-                    if (parts && parts.length === 2) {
-                        let ip = parts[0];
-                        let port = null;
-                        try {
+                    line = line.trim();
+                    if (!line) return;
+                    
+                    let username = null, password = null, ip = null, port = null;
+                    
+                    // Check for authenticated proxy format: username:password@IP:PORT
+                    if (line.includes('@')) {
+                        let authParts = line.split('@');
+                        if (authParts.length === 2) {
+                            let credParts = authParts[0].split(':');
+                            if (credParts.length === 2) {
+                                username = credParts[0];
+                                password = credParts[1];
+                            }
+                            let hostParts = authParts[1].split(':');
+                            if (hostParts.length === 2) {
+                                ip = hostParts[0];
+                                port = hostParts[1];
+                            }
+                        }
+                    } else {
+                        // Simple format: IP:PORT
+                        let parts = line.split(':');
+                        if (parts.length === 2) {
+                            ip = parts[0];
                             port = parts[1];
-                        } catch(e) {
-                            return;
                         }
-                        
-                        if (!/^(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$/.test(ip)) {
-                            return;
-                        }
-                        if (port <= 0 || port > 65535) {
-                            return;
-                        }
-                        proxyList.push({ip: ip, port: port});
                     }
+                    
+                    if (!ip || !port) return;
+                    
+                    try {
+                        port = parseInt(port);
+                        if (port <= 0 || port > 65535) return;
+                    } catch(e) {
+                        return;
+                    }
+                    
+                    let proxyObj = {ip: ip, port: port};
+                    if (username && password) {
+                        proxyObj.username = username;
+                        proxyObj.password = password;
+                    }
+                    proxyList.push(proxyObj);
                 });
 
                 chrome.storage.local.set({proxyList: proxyList});
@@ -354,7 +380,13 @@ const popup = {
             if (settings.proxyList) {
                 document.getElementById("lista-proxy").value = "";
                 settings.proxyList.forEach(proxy => {
-                    document.getElementById("lista-proxy").value += proxy.ip + ":" + proxy.port + "\n";
+                    let proxyStr = "";
+                    if (proxy.username && proxy.password) {
+                        proxyStr = proxy.username + ":" + proxy.password + "@" + proxy.ip + ":" + proxy.port;
+                    } else {
+                        proxyStr = proxy.ip + ":" + proxy.port;
+                    }
+                    document.getElementById("lista-proxy").value += proxyStr + "\n";
                 });
             }
         });

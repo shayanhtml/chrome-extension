@@ -119,7 +119,7 @@
                     <ul class="form-wrapper">
                         <li class="form-row">
                             <label for="lista-proxy">Proxy:</label>
-                            <textarea id="lista-proxy" style="flex: 2" placeholder="IP_1:PORT&#10;IP_2:PORT&#10;..."></textarea>
+                            <textarea id="lista-proxy" style="flex: 2" placeholder="IP:PORT&#10;or&#10;username:password@IP:PORT&#10;&#10;Example:&#10;user:pass@142.111.48.253:7030"></textarea>
                         </li>
                         <li class="form-row">
                             <label for="export-type">Save format:</label>
@@ -142,9 +142,9 @@
                         <li class="form-row">
                             <label for="fetch-delay" class="tooltip" style="padding-top: 0; padding-bottom: 0">Delay between downloads [s]<strong>[?]</strong>:
                                 <span class="tooltiptext">Czas w sekundach jaki czekać pomiędzy próbą pobrania kolejnej księgi.
-                                    Dla każdego wątku z osobna. Zalecane: 3-5 sekund aby uniknąć blokady.</span>
+                                    Dla każdego wątku z osobna. Zalecane: 10-15 sekund aby uniknąć blokady WAF.</span>
                             </label>
-                            <input id="fetch-delay" type="number" value="3" step="1" min="0" max="86400" style="margin-left: 8px; flex: 2; height: fit-content">
+                            <input id="fetch-delay" type="number" value="10" step="1" min="0" max="86400" style="margin-left: 8px; flex: 2; height: fit-content">
                         </li>
                         <li class="form-row">
                             <label for="captcha-solver" style="padding: 0">Captcha method:</label>

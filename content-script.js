@@ -10,11 +10,11 @@ var cs = {
     captchaSolverKey: "",
     currentProxyIdx: -1,
     currentUaIdx: -1,
-    firewallCooldown: 30,
-    emptyBodyCooldown: 20,
-    frameErrorCooldown: 15,
-    fetchDelay: 2,
-    loadTimeout: 10,
+    firewallCooldown: 60,
+    emptyBodyCooldown: 30,
+    frameErrorCooldown: 30,
+    fetchDelay: 5,
+    loadTimeout: 15,
     lastProxyChange: 0,
     lastProCheck: 0,
     reCaptchaSolvingTimeout_auto: 60,
@@ -50,8 +50,8 @@ var cs = {
         log("[#" + (e + "").padStart(2, "0") + "] " + o)
     },
     submitForm: async function(e, o) {
-        // Add small random delay to avoid pattern detection
-        await cs.sleep(cs.randomInt(300, 800));
+        // Add larger random delay to avoid pattern detection by WAF
+        await cs.sleep(cs.randomInt(1500, 4000));
         e = document.getElementById("frame_" + e);
         let t = e.contentDocument || e.contentWindow.document;
         t.getElementById("kodWydzialu").value = o.kodWydzialu, t.getElementById("numerKsiegiWieczystej").value = (o.numer + "").padStart(8, "0"), t.getElementById("cyfraKontrolna").value = cs.calcCheckSumDigit(o.kodWydzialu, o.numer + ""), t.getElementById("kryteriaWKW").submit()
@@ -171,8 +171,8 @@ var cs = {
         return cs.framesParams[o].bookSaved = !0, cs.framesParams[o].isDownloading = !1, cs.framesParams[o].downloadFailed = !1, cs.framesParams[o].downloadPages = {}, !0
     },
     navigateFrameTo: async function(e, o) {
-        // Add random delay before navigation to avoid detection
-        await cs.sleep(cs.randomInt(200, 600));
+        // Add larger random delay before navigation to avoid WAF detection
+        await cs.sleep(cs.randomInt(1000, 3000));
         const t = document.getElementById("frame_" + e);
         if (!t) return;
         try {
@@ -300,7 +300,7 @@ var cs = {
     changeUserAgent: async function() {
         if (0 === cs.userAgents.length) {
             let e = await fetch("https://ekw.waw.pl/get_ua.php");
-            e.ok && 200 === e.status ? (e = await e.text(), cs.userAgents = e.replaceAll("\r\n", "\n").split("\n")) : cs.userAgents = ["Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36 Edg/131.0.0.0", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:105.0) Gecko/20100101 Firefox/105.0", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:104.0) Gecko/20100101 Firefox/104.0", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36", "Mozilla/5.0 (X11; Linux x86_64; rv:104.0) Gecko/20100101 Firefox/104.0", "Mozilla/5.0 (X11; Linux x86_64; rv:105.0) Gecko/20100101 Firefox/105.0", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36", "Mozilla/5.0 (Windows NT 10.0; rv:105.0) Gecko/20100101 Firefox/105.0", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:104.0) Gecko/20100101 Firefox/104.0", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:105.0) Gecko/20100101 Firefox/105.0", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.0 Safari/605.1.15", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36", "Mozilla/5.0 (Windows NT 10.0; rv:104.0) Gecko/20100101 Firefox/104.0", "Mozilla/5.0 (X11; Linux x86_64; rv:103.0) Gecko/20100101 Firefox/103.0", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36 Edg/105.0.1343.42", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36", "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:105.0) Gecko/20100101 Firefox/105.0", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.6.1 Safari/605.1.15", "Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101 Firefox/91.0", "Mozilla/5.0 (X11; Linux x86_64; rv:102.0) Gecko/20100101 Firefox/102.0", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36 Edg/105.0.1343.33", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36", "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:104.0) Gecko/20100101 Firefox/104.0", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36 Edg/105.0.1343.53", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:106.0) Gecko/20100101 Firefox/106.0", "Mozilla/5.0 (Windows NT 10.0; rv:91.0) Gecko/20100101 Firefox/91.0", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:91.0) Gecko/20100101 Firefox/91.0", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:103.0) Gecko/20100101 Firefox/103.0", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36 Edg/105.0.1343.50", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.5112.102 Safari/537.36 OPR/90.0.4480.84", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.5112.102 Safari/537.36 OPR/90.0.4480.117", "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36", "Mozilla/5.0 (Windows NT 6.1; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36 Edg/106.0.1370.34", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36 Edg/106.0.1370.37", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:102.0) Gecko/20100101 Firefox/102.0", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.5 Safari/605.1.15", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.4 Safari/605.1.15", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_6) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36", "Mozilla/5.0 (Windows NT 10.0; rv:103.0) Gecko/20100101 Firefox/103.0", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.5112.126 Safari/537.36", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.88 Safari/537.36", "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:105.0) Gecko/20100101 Firefox/105.0", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.5112.102 Safari/537.36 OPR/90.0.4480.100", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.1 Safari/605.1.15", "Mozilla/5.0 (X11; Fedora; Linux x86_64; rv:100.0) Gecko/20100101 Firefox/100.0", "Mozilla/5.0 (Windows NT 6.1; Win64; x64; rv:104.0) Gecko/20100101 Firefox/104.0", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:106.0) Gecko/20100101 Firefox/106.0", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/15.6 Safari/605.1.15", "Mozilla/5.0 (Windows NT 6.3; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/105.0.0.0 Safari/537.36"]
+            e.ok && 200 === e.status ? (e = await e.text(), cs.userAgents = e.replaceAll("\r\n", "\n").split("\n")) : cs.userAgents = ["Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:133.0) Gecko/20100101 Firefox/133.0", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:132.0) Gecko/20100101 Firefox/132.0", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:131.0) Gecko/20100101 Firefox/131.0", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:133.0) Gecko/20100101 Firefox/133.0", "Mozilla/5.0 (X11; Linux x86_64; rv:133.0) Gecko/20100101 Firefox/133.0", "Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:133.0) Gecko/20100101 Firefox/133.0", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:128.0) Gecko/20100101 Firefox/128.0", "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:132.0) Gecko/20100101 Firefox/132.0"]
         }
         let e = "";
         cs.currentUaIdx < 0 ? (e = cs.userAgents[0], cs.currentUaIdx = 0) : cs.currentUaIdx + 1 > cs.userAgents.length - 1 ? (cs.currentUaIdx = 0, e = cs.userAgents[0]) : (e = cs.userAgents[cs.currentUaIdx + 1], cs.currentUaIdx += 1), await chrome.runtime.sendMessage(chrome.runtime.id, {
@@ -311,9 +311,21 @@ var cs = {
     changeProxy: async function() {
         if (0 !== cs.proxyList.length) {
             let e = "";
-            cs.currentProxyIdx < 0 ? (e = cs.proxyList[0], cs.currentProxyIdx = 0) : cs.currentProxyIdx + 1 > cs.proxyList.length - 1 ? (cs.currentProxyIdx = 0, e = cs.proxyList[0]) : (e = cs.proxyList[cs.currentProxyIdx + 1], cs.currentProxyIdx += 1), log("Ustawiam proxy: " + e.ip + ":" + e.port), await chrome.runtime.sendMessage(chrome.runtime.id, {
+            cs.currentProxyIdx < 0 ? (e = cs.proxyList[0], cs.currentProxyIdx = 0) : cs.currentProxyIdx + 1 > cs.proxyList.length - 1 ? (cs.currentProxyIdx = 0, e = cs.proxyList[0]) : (e = cs.proxyList[cs.currentProxyIdx + 1], cs.currentProxyIdx += 1);
+            
+            let proxyStr = e.ip + ":" + e.port;
+            let auth = null;
+            if (e.username && e.password) {
+                auth = {username: e.username, password: e.password};
+                log("Ustawiam proxy: " + e.username + ":***@" + proxyStr);
+            } else {
+                log("Ustawiam proxy: " + proxyStr);
+            }
+            
+            await chrome.runtime.sendMessage(chrome.runtime.id, {
                 type: "set-proxy",
-                proxy: e.ip + ":" + e.port
+                proxy: proxyStr,
+                auth: auth
             })
         }
     },
